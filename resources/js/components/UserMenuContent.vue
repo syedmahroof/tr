@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { LogOut, Settings } from '@lucide/vue';
 import {
     DropdownMenuGroup,
@@ -15,6 +16,9 @@ import type { User } from '@/types';
 type Props = {
     user: User;
 };
+
+const page = usePage();
+const isAdmin = computed(() => page.url.startsWith('/admin'));
 
 const handleLogout = () => {
     router.flushAll();
@@ -42,7 +46,8 @@ defineProps<Props>();
     <DropdownMenuItem :as-child="true">
         <Link
             class="block w-full cursor-pointer"
-            :href="logout()"
+            :href="isAdmin ? '/admin/logout' : logout().url"
+            :method="isAdmin ? 'post' : logout().method || 'post'"
             @click="handleLogout"
             as="button"
             data-test="logout-button"
