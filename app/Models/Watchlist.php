@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Watchlist extends Model
+{
+    protected $fillable = [
+        'name',
+        'reason',
+        'added_by',
+        'status',
+    ];
+}

@@ -1,16 +1,9 @@
 <script setup lang="ts">
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
 </script>
 
 <template>
-    <div
-        class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
-    >
-        <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
-    </div>
-    <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="mb-0.5 truncate leading-tight font-semibold"
-            >Laravel Starter Kit</span
-        >
+    <img src="/logo.png" alt="Entrio" class="h-8 w-auto object-contain transition-all dark:drop-shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
+    <div class="ml-2 grid flex-1 text-left text-sm">
+        <span class="mb-0.5 truncate leading-tight font-semibold">Entrio</span>
     </div>
 </template>
