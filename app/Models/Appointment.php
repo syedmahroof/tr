@@ -20,7 +20,7 @@ class Appointment extends Model
         'date_time' => 'datetime',
     ];
 
-    public function host()
+    public function host(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, 'host_id');
     }

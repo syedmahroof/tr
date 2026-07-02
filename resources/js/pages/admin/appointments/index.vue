@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Plus, Edit, Trash2, Search, CalendarCheck } from '@lucide/vue';
 import { ref, watch } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
+import Pagination from '@/components/Pagination.vue';
 
 const props = defineProps<{
     appointments: any[];
@@ -14,6 +15,14 @@ const props = defineProps<{
 const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
 let searchTimeout: any = null;
+
+import { computed } from 'vue';
+const appointmentsList = computed(() => {
+    if (props.appointments && (props.appointments as any).data) {
+        return (props.appointments as any).data;
+    }
+    return props.appointments || [];
+});
 
 watch([search, status], ([newSearch, newStatus]) => {
     clearTimeout(searchTimeout);
@@ -30,6 +39,7 @@ const deleteAppointment = (id: number) => {
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+
     return new Intl.DateTimeFormat('en-US', {
         month: 'short',
         day: '2-digit',
@@ -73,7 +83,7 @@ const formatDate = (dateString: string) => {
                 </div>
             </div>
             
-            <div v-if="!appointments || appointments.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
+            <div v-if="appointmentsList.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
                 <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mb-4">
                     <CalendarCheck class="w-8 h-8" />
                 </div>
@@ -103,7 +113,7 @@ const formatDate = (dateString: string) => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
-                            <tr v-for="appointment in appointments" :key="appointment.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
+                            <tr v-for="appointment in appointmentsList" :key="appointment.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
                                 <td class="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
                                     {{ formatDate(appointment.date_time) }}
                                 </td>
@@ -143,6 +153,9 @@ const formatDate = (dateString: string) => {
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination -->
+                <Pagination v-if="appointments && (appointments as any).meta" :links="(appointments as any).meta.links" :meta="(appointments as any).meta" />
+                <Pagination v-else-if="appointments && (appointments as any).links" :links="(appointments as any).links" :meta="(appointments as any)" />
             </div>
         </div>
     </AdminSidebarLayout>

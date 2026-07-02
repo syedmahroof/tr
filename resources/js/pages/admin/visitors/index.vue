@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
+import { UserPlus, Edit, Trash2, Eye, Search, CheckCircle, LogOut } from '@lucide/vue';
+import { ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UserPlus, Edit, Trash2, Eye, Search } from '@lucide/vue';
-import { ref, watch } from 'vue';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
+import Pagination from '@/components/Pagination.vue';
 
 const props = defineProps<{
     visitors: any[];
@@ -14,6 +15,14 @@ const props = defineProps<{
 const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
 let searchTimeout: any = null;
+
+import { computed } from 'vue';
+const visitorsList = computed(() => {
+    if (props.visitors && (props.visitors as any).data) {
+        return (props.visitors as any).data;
+    }
+    return props.visitors || [];
+});
 
 watch([search, status], ([newSearch, newStatus]) => {
     clearTimeout(searchTimeout);
@@ -46,7 +55,7 @@ watch([search, status], ([newSearch, newStatus]) => {
                         <option value="checked_out">Checked Out</option>
                     </select>
 
-                    <Link href="/admin/visitors/registration" v-if="visitors && visitors.length > 0">
+                    <Link href="/admin/visitors/registration" v-if="visitorsList.length > 0">
                         <Button class="bg-indigo-600 hover:bg-indigo-700 text-white">
                             <UserPlus class="mr-2 h-4 w-4" />
                             Add Visitor
@@ -56,7 +65,7 @@ watch([search, status], ([newSearch, newStatus]) => {
             </div>
             
             <!-- Empty State -->
-            <div v-if="!visitors || visitors.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
+            <div v-if="visitorsList.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
                 <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mb-4">
                     <UserPlus class="w-8 h-8" />
                 </div>
@@ -88,7 +97,7 @@ watch([search, status], ([newSearch, newStatus]) => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
-                            <tr v-for="visitor in visitors" :key="visitor.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
+                            <tr v-for="visitor in visitorsList" :key="visitor.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
                                 <td class="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100">
                                     {{ visitor.visitor_id }}
                                 </td>
@@ -125,6 +134,12 @@ watch([search, status], ([newSearch, newStatus]) => {
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
+                                        <Link v-if="visitor.status === 'pending'" :href="`/admin/visitors/${visitor.id}/status`" method="patch" :data="{ status: 'checked_in' }" as="button" type="button" class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300" title="Check In">
+                                            <CheckCircle class="w-4 h-4" />
+                                        </Link>
+                                        <Link v-if="visitor.status === 'checked_in'" :href="`/admin/visitors/${visitor.id}/status`" method="patch" :data="{ status: 'checked_out' }" as="button" type="button" class="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300" title="Check Out">
+                                            <LogOut class="w-4 h-4" />
+                                        </Link>
                                         <Link :href="`/admin/visitors/${visitor.id}`" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300" title="View">
                                             <Eye class="w-4 h-4" />
                                         </Link>
@@ -140,6 +155,9 @@ watch([search, status], ([newSearch, newStatus]) => {
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination -->
+                <Pagination v-if="visitors && (visitors as any).meta" :links="(visitors as any).meta.links" :meta="(visitors as any).meta" />
+                <Pagination v-else-if="visitors && (visitors as any).links" :links="(visitors as any).links" :meta="(visitors as any)" />
             </div>
             
         </div>

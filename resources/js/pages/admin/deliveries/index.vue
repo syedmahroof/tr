@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Package, Edit, Trash2, Eye, History, Search } from '@lucide/vue';
 import { ref, watch } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
+import Pagination from '@/components/Pagination.vue';
 
 const props = defineProps<{
     deliveries: any[];
@@ -14,6 +15,14 @@ const props = defineProps<{
 const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
 let searchTimeout: any = null;
+
+import { computed } from 'vue';
+const deliveriesList = computed(() => {
+    if (props.deliveries && (props.deliveries as any).data) {
+        return (props.deliveries as any).data;
+    }
+    return props.deliveries || [];
+});
 
 watch([search, status], ([newSearch, newStatus]) => {
     clearTimeout(searchTimeout);
@@ -46,7 +55,7 @@ watch([search, status], ([newSearch, newStatus]) => {
                         <option value="collected">Collected</option>
                     </select>
 
-                    <Link href="/admin/deliveries/create" v-if="deliveries && deliveries.length > 0">
+                    <Link href="/admin/deliveries/create" v-if="deliveriesList.length > 0">
                         <Button class="bg-indigo-600 hover:bg-indigo-700 text-white">
                             <Package class="mr-2 h-4 w-4" />
                             Add Delivery
@@ -56,7 +65,7 @@ watch([search, status], ([newSearch, newStatus]) => {
             </div>
             
             <!-- Empty State -->
-            <div v-if="!deliveries || deliveries.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
+            <div v-if="deliveriesList.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
                 <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mb-4">
                     <Package class="w-8 h-8" />
                 </div>
@@ -87,7 +96,7 @@ watch([search, status], ([newSearch, newStatus]) => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
-                            <tr v-for="delivery in deliveries" :key="delivery.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
+                            <tr v-for="delivery in deliveriesList" :key="delivery.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
                                 <td class="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100">
                                     {{ delivery.delivery_id }}
                                 </td>
@@ -128,8 +137,7 @@ watch([search, status], ([newSearch, newStatus]) => {
                         </tbody>
                     </table>
                 </div>
-                
-                <div class="flex justify-center p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+                <div class="flex justify-center p-4 bg-zinc-50 dark:bg-zinc-900/50">
                     <Link href="/admin/deliveries/history">
                         <Button variant="outline" class="text-zinc-600 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800">
                             <History class="mr-2 h-4 w-4" />
@@ -137,6 +145,10 @@ watch([search, status], ([newSearch, newStatus]) => {
                         </Button>
                     </Link>
                 </div>
+                
+                <!-- Pagination -->
+                <Pagination v-if="deliveries && (deliveries as any).meta" :links="(deliveries as any).meta.links" :meta="(deliveries as any).meta" />
+                <Pagination v-else-if="deliveries && (deliveries as any).links" :links="(deliveries as any).links" :meta="(deliveries as any)" />
             </div>
             
         </div>

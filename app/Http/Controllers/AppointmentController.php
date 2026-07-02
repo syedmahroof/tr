@@ -11,20 +11,20 @@ class AppointmentController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->query('search');
-        $status = $request->query('status');
+        $search = (string) $request->query('search');
+        $status = (string) $request->query('status');
 
         $appointments = Appointment::with('host')
             ->when($search, function ($query, $search) {
                 $query->where('visitor_name', 'like', "%{$search}%")
-                      ->orWhere('visitor_email', 'like', "%{$search}%")
-                      ->orWhere('purpose', 'like', "%{$search}%");
+                    ->orWhere('visitor_email', 'like', "%{$search}%")
+                    ->orWhere('purpose', 'like', "%{$search}%");
             })
             ->when($status, function ($query, $status) {
                 $query->where('status', $status);
             })
             ->orderBy('date_time', 'asc')
-            ->get();
+            ->paginate(10)->withQueryString();
 
         return Inertia::render('admin/appointments/index', [
             'appointments' => $appointments,
@@ -35,6 +35,7 @@ class AppointmentController extends Controller
     public function create()
     {
         $employees = User::select('id', 'name', 'department')->get();
+
         return Inertia::render('admin/appointments/create', [
             'employees' => $employees,
         ]);
@@ -43,12 +44,12 @@ class AppointmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'visitor_name'    => 'required|string|max:255',
-            'visitor_email'   => 'nullable|email|max:255',
+            'visitor_name' => 'required|string|max:255',
+            'visitor_email' => 'nullable|email|max:255',
             'visitor_company' => 'nullable|string|max:255',
-            'host_id'         => 'required|exists:users,id',
-            'date_time'       => 'required|date',
-            'purpose'         => 'required|string|max:500',
+            'host_id' => 'required|exists:users,id',
+            'date_time' => 'required|date',
+            'purpose' => 'required|string|max:500',
         ]);
 
         $validated['status'] = 'scheduled';
@@ -61,6 +62,7 @@ class AppointmentController extends Controller
     public function edit(Appointment $appointment)
     {
         $employees = User::select('id', 'name', 'department')->get();
+
         return Inertia::render('admin/appointments/edit', [
             'appointment' => $appointment,
             'employees' => $employees,
@@ -70,13 +72,13 @@ class AppointmentController extends Controller
     public function update(Request $request, Appointment $appointment)
     {
         $validated = $request->validate([
-            'visitor_name'    => 'required|string|max:255',
-            'visitor_email'   => 'nullable|email|max:255',
+            'visitor_name' => 'required|string|max:255',
+            'visitor_email' => 'nullable|email|max:255',
             'visitor_company' => 'nullable|string|max:255',
-            'host_id'         => 'required|exists:users,id',
-            'date_time'       => 'required|date',
-            'purpose'         => 'required|string|max:500',
-            'status'          => 'required|string|in:scheduled,completed,cancelled',
+            'host_id' => 'required|exists:users,id',
+            'date_time' => 'required|date',
+            'purpose' => 'required|string|max:500',
+            'status' => 'required|string|in:scheduled,completed,cancelled',
         ]);
 
         $appointment->update($validated);
@@ -87,6 +89,7 @@ class AppointmentController extends Controller
     public function destroy(Appointment $appointment)
     {
         $appointment->delete();
+
         return redirect()->route('admin.appointments')->with('success', 'Appointment deleted successfully.');
     }
 }

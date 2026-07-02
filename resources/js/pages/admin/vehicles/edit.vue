@@ -1,29 +1,70 @@
 <script setup lang="ts">
 import { useForm, Head, Link } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ref, computed } from 'vue';
+import { Loader2, ArrowLeft, ChevronDown } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, ArrowLeft } from '@lucide/vue';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
 
 const props = defineProps<{
     vehicle: any;
 }>();
 
+const v = computed(() => props.vehicle.data || props.vehicle);
+
 const form = useForm({
-    owner_name: props.vehicle.owner_name,
-    owner_type: props.vehicle.owner_type,
-    license_plate: props.vehicle.license_plate,
-    make: props.vehicle.make || '',
-    model: props.vehicle.model || '',
-    color: props.vehicle.color || '',
-    status: props.vehicle.status,
-    notes: props.vehicle.notes || '',
+    owner_name: v.value.owner_name,
+    owner_type: v.value.owner_type,
+    license_plate: v.value.license_plate,
+    make: v.value.make || '',
+    model: v.value.model || '',
+    color: v.value.color || '',
+    status: v.value.status,
+    notes: v.value.notes || '',
+    photo: null,
+    _method: 'put',
 });
 
 const submit = () => {
-    form.put(`/admin/vehicles/${props.vehicle.id}`);
+    form.post(`/admin/vehicles/${v.value.id}`, {
+        preserveScroll: true,
+    });
+};
+
+const vehicleData: Record<string, string[]> = {
+    'Toyota': ['Corolla', 'Camry', 'RAV4', 'Highlander', 'Tacoma', 'Tundra', 'Prius', 'Sienna', '4Runner', 'Yaris'],
+    'Honda': ['Civic', 'Accord', 'CR-V', 'Pilot', 'Odyssey', 'HR-V', 'Ridgeline', 'Fit', 'Passport', 'Insight'],
+    'Ford': ['F-150', 'Mustang', 'Explorer', 'Escape', 'Focus', 'Edge', 'Ranger', 'Bronco', 'Expedition', 'Fusion'],
+    'Chevrolet': ['Silverado', 'Equinox', 'Malibu', 'Tahoe', 'Traverse', 'Colorado', 'Impala', 'Camaro', 'Suburban', 'Trailblazer'],
+    'Nissan': ['Altima', 'Rogue', 'Sentra', 'Pathfinder', 'Maxima', 'Murano', 'Frontier', 'Titan', 'Versa', 'Kicks'],
+    'Hyundai': ['Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Palisade', 'Kona', 'Venue', 'Ioniq', 'Accent', 'Veloster'],
+    'Kia': ['Forte', 'Optima', 'Sorento', 'Sportage', 'Telluride', 'Soul', 'Seltos', 'Rio', 'Stinger', 'Carnival'],
+    'Volkswagen': ['Jetta', 'Passat', 'Tiguan', 'Atlas', 'Golf', 'Taos', 'Arteon', 'ID.4', 'Touareg', 'Beetle'],
+    'BMW': ['3 Series', '5 Series', 'X3', 'X5', '4 Series', '7 Series', 'X1', 'X7', 'M3', 'i4'],
+    'Mercedes-Benz': ['C-Class', 'E-Class', 'GLC', 'GLE', 'S-Class', 'A-Class', 'GLS', 'CLA', 'G-Class', 'EQE']
+};
+
+const brands = Object.keys(vehicleData);
+const availableModels = computed(() => {
+    if (form.make && vehicleData[form.make]) {
+        return vehicleData[form.make];
+    }
+    return [];
+});
+
+const showBrand = ref(false);
+const showModel = ref(false);
+
+const selectBrand = (brand: string) => {
+    form.make = brand;
+    showBrand.value = false;
+};
+
+const selectModel = (mod: string) => {
+    form.model = mod;
+    showModel.value = false;
 };
 </script>
 
@@ -39,7 +80,7 @@ const submit = () => {
                 </Link>
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight">Edit Vehicle</h1>
-                    <p class="text-muted-foreground mt-1">Update details for {{ vehicle.vehicle_id }}</p>
+                    <p class="text-muted-foreground mt-1">Update details for {{ v.vehicle_id }}</p>
                 </div>
             </div>
             
@@ -77,6 +118,8 @@ const submit = () => {
                                 <Label for="status">Status *</Label>
                                 <select id="status" v-model="form.status" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                                     <option value="active">Active</option>
+                                    <option value="checked_in">Checked In</option>
+                                    <option value="checked_out">Checked Out</option>
                                     <option value="inactive">Inactive</option>
                                     <option value="banned">Banned</option>
                                 </select>
@@ -89,16 +132,49 @@ const submit = () => {
                                 <span class="text-sm text-red-500" v-if="form.errors.color">{{ form.errors.color }}</span>
                             </div>
                             
-                            <div class="space-y-2">
+                            <div class="space-y-2 relative">
                                 <Label for="make">Make / Brand</Label>
-                                <Input id="make" v-model="form.make" />
+                                <div class="relative">
+                                    <Input id="make" v-model="form.make" placeholder="Toyota" autocomplete="off" @focus="showBrand = true" @blur="showBrand = false" />
+                                    <button type="button" tabindex="-1" @mousedown.prevent @click="showBrand = !showBrand" class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                        <ChevronDown class="h-4 w-4 text-zinc-400/50 hover:text-zinc-500" />
+                                    </button>
+                                </div>
+                                <div v-show="showBrand" class="absolute z-10 mt-1 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-lg max-h-60 overflow-auto">
+                                    <div v-for="brand in brands" :key="brand" @mousedown.prevent="selectBrand(brand)" class="cursor-pointer px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm">
+                                        {{ brand }}
+                                    </div>
+                                </div>
                                 <span class="text-sm text-red-500" v-if="form.errors.make">{{ form.errors.make }}</span>
                             </div>
                             
-                            <div class="space-y-2 md:col-span-2">
+                            <div class="space-y-2 md:col-span-2 relative">
                                 <Label for="model">Model</Label>
-                                <Input id="model" v-model="form.model" />
+                                <div class="relative">
+                                    <Input id="model" v-model="form.model" placeholder="Camry" autocomplete="off" @focus="showModel = true" @blur="showModel = false" />
+                                    <button type="button" tabindex="-1" @mousedown.prevent @click="showModel = !showModel" class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                        <ChevronDown class="h-4 w-4 text-zinc-400/50 hover:text-zinc-500" />
+                                    </button>
+                                </div>
+                                <div v-show="showModel && availableModels.length > 0" class="absolute z-10 mt-1 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-lg max-h-60 overflow-auto">
+                                    <div v-for="mod in availableModels" :key="mod" @mousedown.prevent="selectModel(mod)" class="cursor-pointer px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm">
+                                        {{ mod }}
+                                    </div>
+                                </div>
                                 <span class="text-sm text-red-500" v-if="form.errors.model">{{ form.errors.model }}</span>
+                            </div>
+
+                            <div class="space-y-2 md:col-span-2">
+                                <Label for="photo">Vehicle Photo</Label>
+                                <div class="flex items-center gap-4">
+                                    <div v-if="v.photo" class="h-16 w-16 overflow-hidden rounded-md border border-zinc-200 dark:border-zinc-800">
+                                        <img :src="`/storage/${v.photo}`" alt="Vehicle Photo" class="h-full w-full object-cover" />
+                                    </div>
+                                    <div class="flex-1">
+                                        <Input id="photo" type="file" @change="e => form.photo = e.target.files[0]" accept="image/*" capture="environment" class="cursor-pointer file:cursor-pointer file:border-0 file:bg-zinc-100 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-600 hover:file:bg-zinc-200 dark:file:bg-zinc-800 dark:hover:file:bg-zinc-700" />
+                                        <span class="text-sm text-red-500" v-if="form.errors.photo">{{ form.errors.photo }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         

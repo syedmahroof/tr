@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
+import { ArrowLeft, Save } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Save } from '@lucide/vue';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
 
 const props = defineProps<{
     watchlist: any;

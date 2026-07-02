@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Edit, Trash2, CheckCircle, LogOut } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Trash2 } from '@lucide/vue';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
 
 defineProps<{
     visitor: any;
@@ -28,6 +28,18 @@ defineProps<{
                 </div>
                 
                 <div class="flex items-center gap-2">
+                    <Link v-if="visitor.status === 'pending'" :href="`/admin/visitors/${visitor.id}/status`" method="patch" :data="{ status: 'checked_in' }" as="button" type="button">
+                        <Button variant="outline" class="text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-900 dark:hover:bg-emerald-900/30 dark:text-emerald-400">
+                            <CheckCircle class="mr-2 h-4 w-4" />
+                            Check In
+                        </Button>
+                    </Link>
+                    <Link v-if="visitor.status === 'checked_in'" :href="`/admin/visitors/${visitor.id}/status`" method="patch" :data="{ status: 'checked_out' }" as="button" type="button">
+                        <Button variant="outline" class="text-orange-600 border-orange-200 hover:bg-orange-50 hover:text-orange-700 dark:border-orange-900 dark:hover:bg-orange-900/30 dark:text-orange-400">
+                            <LogOut class="mr-2 h-4 w-4" />
+                            Check Out
+                        </Button>
+                    </Link>
                     <Link :href="`/admin/visitors/${visitor.id}/edit`">
                         <Button variant="outline" class="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-blue-900 dark:hover:bg-blue-900/30 dark:text-blue-400">
                             <Edit class="mr-2 h-4 w-4" />

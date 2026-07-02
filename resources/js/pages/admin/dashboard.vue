@@ -1,28 +1,16 @@
-<script setup>
-import { usePage, useForm, Head } from '@inertiajs/vue3';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+<script setup lang="ts">
+import { Head } from '@inertiajs/vue3';
 import { 
-    Users, Activity, Settings, LogOut, UserCheck, UserX, UserPlus, 
-    CalendarCheck, ClipboardCheck, Briefcase, FileSignature, AlertTriangle, Package, Building
+    Users, Activity, CalendarCheck, AlertTriangle, FileSignature, Briefcase, Package, Building
 } from '@lucide/vue';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
-
-const props = defineProps({
-    stats: {
-        type: Object,
-        default: () => ({})
-    }
-});
-const user = usePage().props.auth?.user;
-const form = useForm({});
-
-const logout = () => {
-    form.post('/admin/logout');
-};
-
 import { VisXYContainer, VisLine, VisAxis, VisDonut, VisStackedBar } from '@unovis/vue';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartCrosshair } from '@/components/ui/chart';
+
+defineProps<{
+    stats: any;
+}>();
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
 
 const trendData = [
     { name: 'Mon', total: 120 },

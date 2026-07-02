@@ -10,12 +10,13 @@ class WatchlistController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->query('search');
+        $search = (string) $request->query('search');
+        $status = (string) $request->query('status');
 
         $watchlists = Watchlist::when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('reason', 'like', "%{$search}%");
-            })
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhere('reason', 'like', "%{$search}%");
+        })
             ->latest()
             ->get();
 
@@ -33,9 +34,9 @@ class WatchlistController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'reason'   => 'required|string|max:1000',
-            'status'   => 'required|string|in:active,inactive',
+            'name' => 'required|string|max:255',
+            'reason' => 'required|string|max:1000',
+            'status' => 'required|string|in:active,inactive',
         ]);
 
         $validated['added_by'] = 'Admin'; // Could be auth()->user()->name
@@ -55,9 +56,9 @@ class WatchlistController extends Controller
     public function update(Request $request, Watchlist $watchlist)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'reason'   => 'required|string|max:1000',
-            'status'   => 'required|string|in:active,inactive',
+            'name' => 'required|string|max:255',
+            'reason' => 'required|string|max:1000',
+            'status' => 'required|string|in:active,inactive',
         ]);
 
         $watchlist->update($validated);
@@ -68,6 +69,7 @@ class WatchlistController extends Controller
     public function destroy(Watchlist $watchlist)
     {
         $watchlist->delete();
+
         return redirect()->route('admin.security')->with('success', 'Removed from watchlist successfully.');
     }
 }

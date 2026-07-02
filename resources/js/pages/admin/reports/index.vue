@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Car, Package, ShieldAlert } from '@lucide/vue';
 </script>
 
@@ -68,4 +66,6 @@ import { Users, Car, Package, ShieldAlert } from '@lucide/vue';
 
 <script lang="ts">
 import { BarChart3 } from '@lucide/vue';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
 </script>

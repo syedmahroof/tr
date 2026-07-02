@@ -3,7 +3,7 @@ import { Moon, Sun } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { useAppearance } from '@/composables/useAppearance';
 
-const { appearance, resolvedAppearance, updateAppearance } = useAppearance();
+const { resolvedAppearance, updateAppearance } = useAppearance();
 
 const toggleTheme = () => {
     updateAppearance(resolvedAppearance.value === 'dark' ? 'light' : 'dark');
