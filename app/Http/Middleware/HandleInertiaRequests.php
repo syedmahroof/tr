@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,10 +43,12 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $user,
+                'admin' => auth()->guard('admin')->check() ? auth()->guard('admin')->user() : null,
             ],
+            'notifications' => fn () => auth()->guard('admin')->check() ? auth()->guard('admin')->user()->unreadNotifications : [],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'currentTeam' => fn () => ($user instanceof \App\Models\User && $user->currentTeam) ? $user->toUserTeam($user->currentTeam) : null,
-            'teams' => fn () => ($user instanceof \App\Models\User) ? $user->toUserTeams(includeCurrent: true) : [],
+            'currentTeam' => fn () => ($user instanceof User && $user->currentTeam) ? $user->toUserTeam($user->currentTeam) : null,
+            'teams' => fn () => ($user instanceof User) ? $user->toUserTeams(includeCurrent: true) : [],
         ];
     }
 }

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
+import { Car, Edit, Trash2, Eye, Search, CheckCircle, LogOut } from '@lucide/vue';
+import { ref, watch, computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Car, Edit, Trash2, Eye, Search } from '@lucide/vue';
-import { ref, watch } from 'vue';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
+import Pagination from '@/components/Pagination.vue';
 
 const props = defineProps<{
     vehicles: any[];
@@ -14,6 +15,13 @@ const props = defineProps<{
 const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
 let searchTimeout: any = null;
+
+const vehiclesList = computed(() => {
+    if (props.vehicles && props.vehicles.data) {
+        return props.vehicles.data;
+    }
+    return props.vehicles || [];
+});
 
 watch([search, status], ([newSearch, newStatus]) => {
     clearTimeout(searchTimeout);
@@ -45,7 +53,7 @@ watch([search, status], ([newSearch, newStatus]) => {
                         <option value="checked_out">Checked Out</option>
                     </select>
 
-                    <Link href="/admin/vehicles/registration" v-if="vehicles && vehicles.length > 0">
+                    <Link href="/admin/vehicles/registration" v-if="vehiclesList.length > 0">
                         <Button class="bg-indigo-600 hover:bg-indigo-700 text-white">
                             <Car class="mr-2 h-4 w-4" />
                             Add Vehicle
@@ -55,20 +63,28 @@ watch([search, status], ([newSearch, newStatus]) => {
             </div>
             
             <!-- Empty State -->
-            <div v-if="!vehicles || vehicles.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
+            <div v-if="vehiclesList.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
                 <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mb-4">
                     <Car class="w-8 h-8" />
                 </div>
-                <h3 class="text-xl font-semibold mb-2">No vehicles currently</h3>
-                <p class="text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-6">
-                    Get started by registering a vehicle. You can manage employee and visitor vehicles from here.
-                </p>
-                <Link href="/admin/vehicles/registration">
-                    <Button class="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">
-                        <Car class="mr-2 h-4 w-4" />
-                        Add Vehicle
-                    </Button>
-                </Link>
+                <template v-if="search || status">
+                    <h3 class="text-xl font-semibold mb-2">No vehicles available</h3>
+                    <p class="text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
+                        There are no vehicles matching your current filter.
+                    </p>
+                </template>
+                <template v-else>
+                    <h3 class="text-xl font-semibold mb-2">No vehicles currently</h3>
+                    <p class="text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto mb-6">
+                        Get started by registering a vehicle. You can manage employee and visitor vehicles from here.
+                    </p>
+                    <Link href="/admin/vehicles/registration">
+                        <Button class="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">
+                            <Car class="mr-2 h-4 w-4" />
+                            Add Vehicle
+                        </Button>
+                    </Link>
+                </template>
             </div>
             
             <!-- Data Table -->
@@ -81,13 +97,13 @@ watch([search, status], ([newSearch, newStatus]) => {
                                 <th scope="col" class="px-6 py-4 font-medium">Owner</th>
                                 <th scope="col" class="px-6 py-4 font-medium">Type</th>
                                 <th scope="col" class="px-6 py-4 font-medium">License Plate</th>
-                                <th scope="col" class="px-6 py-4 font-medium">Details</th>
+                                <th scope="col" class="px-6 py-4 font-medium">Vehicle Name</th>
                                 <th scope="col" class="px-6 py-4 font-medium">Status</th>
                                 <th scope="col" class="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
-                            <tr v-for="vehicle in vehicles" :key="vehicle.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
+                            <tr v-for="vehicle in vehiclesList" :key="vehicle.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
                                 <td class="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100">
                                     {{ vehicle.vehicle_id }}
                                 </td>
@@ -107,21 +123,38 @@ watch([search, status], ([newSearch, newStatus]) => {
                                 <td class="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100">
                                     {{ vehicle.license_plate }}
                                 </td>
-                                <td class="px-6 py-4 text-zinc-600 dark:text-zinc-400">
-                                    {{ vehicle.make }} {{ vehicle.model }} <span v-if="vehicle.color">({{ vehicle.color }})</span>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div v-if="vehicle.photo" class="h-10 w-10 flex-shrink-0 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                                            <img :src="`/storage/${vehicle.photo}`" alt="" class="h-full w-full object-cover" />
+                                        </div>
+                                        <div v-else class="h-10 w-10 flex-shrink-0 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
+                                            <Car class="h-5 w-5" />
+                                        </div>
+                                        <div class="text-zinc-600 dark:text-zinc-400">
+                                            {{ vehicle.make }} {{ vehicle.model }} <span v-if="vehicle.color">({{ vehicle.color }})</span>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
                                           :class="{
-                                              'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300': vehicle.status === 'active',
+                                              'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300': vehicle.status === 'active' || vehicle.status === 'checked_in',
                                               'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300': vehicle.status === 'banned',
+                                              'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500 line-through': vehicle.status === 'checked_out',
                                               'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500': vehicle.status === 'inactive'
                                           }">
-                                        {{ vehicle.status }}
+                                        {{ vehicle.status.replace('_', ' ') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
+                                        <Link v-if="vehicle.status !== 'checked_in' && vehicle.status !== 'banned'" :href="`/admin/vehicles/${vehicle.id}/status`" method="patch" :data="{ status: 'checked_in' }" as="button" type="button" class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300" title="Check In">
+                                            <CheckCircle class="w-4 h-4" />
+                                        </Link>
+                                        <Link v-if="vehicle.status === 'checked_in'" :href="`/admin/vehicles/${vehicle.id}/status`" method="patch" :data="{ status: 'checked_out' }" as="button" type="button" class="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300" title="Check Out">
+                                            <LogOut class="w-4 h-4" />
+                                        </Link>
                                         <Link :href="`/admin/vehicles/${vehicle.id}`" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300" title="View">
                                             <Eye class="w-4 h-4" />
                                         </Link>
@@ -137,6 +170,9 @@ watch([search, status], ([newSearch, newStatus]) => {
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination -->
+                <Pagination v-if="vehicles && vehicles.meta" :links="vehicles.meta.links" :meta="vehicles.meta" />
+                <Pagination v-else-if="vehicles && vehicles.links" :links="vehicles.links" :meta="vehicles" />
             </div>
             
         </div>

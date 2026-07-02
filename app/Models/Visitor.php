@@ -19,6 +19,6 @@ class Visitor extends Model
         'id_proof_number',
         'photo',
         'vehicle_number',
-        'status'
+        'status',
     ];
 }

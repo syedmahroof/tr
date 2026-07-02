@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, PackageCheck, CheckCircle2 } from '@lucide/vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
+import Pagination from '@/components/Pagination.vue';
 
 defineProps<{
-    deliveries: any[];
+    deliveries: any;
 }>();
+
+import { computed } from 'vue';
+const deliveriesList = computed(() => {
+    if (deliveries && (deliveries as any).data) {
+        return (deliveries as any).data;
+    }
+    return deliveries || [];
+});
 </script>
 
 <template>
@@ -32,10 +41,10 @@ defineProps<{
                 </CardHeader>
                 <CardContent class="p-0">
                     <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
-                        <div v-if="deliveries.length === 0" class="p-8 text-center text-zinc-500">
+                        <div v-if="deliveriesList.length === 0" class="p-8 text-center text-zinc-500">
                             No delivery history found.
                         </div>
-                        <template v-for="delivery in deliveries" :key="delivery.id">
+                        <template v-for="delivery in deliveriesList" :key="delivery.id">
                             <!-- Collected Log -->
                             <div v-if="delivery.collected_at" class="p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/30 transition-colors flex items-start gap-4">
                                 <div class="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-full text-emerald-600 dark:text-emerald-400 mt-0.5">
@@ -96,6 +105,10 @@ defineProps<{
                     </div>
                 </CardContent>
             </Card>
+            
+            <!-- Pagination -->
+            <Pagination v-if="deliveries && (deliveries as any).meta" :links="(deliveries as any).meta.links" :meta="(deliveries as any).meta" />
+            <Pagination v-else-if="deliveries && (deliveries as any).links" :links="(deliveries as any).links" :meta="(deliveries as any)" />
         </div>
     </AdminSidebarLayout>
 </template>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
 </script>
 
 <template>

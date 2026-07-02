@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ShieldAlert, Edit, Trash2, Search } from '@lucide/vue';
 import { ref, watch } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
 
 const props = defineProps<{
     watchlists: any[];
@@ -29,6 +29,7 @@ const removeWatchlist = (id: number) => {
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
+
     return new Intl.DateTimeFormat('en-US', {
         month: 'short',
         day: '2-digit',

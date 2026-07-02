@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { UserPlus, Edit, Trash2, Search, UserCheck } from '@lucide/vue';
 import { ref, watch } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import AdminSidebarLayout from '@/layouts/admin/AdminSidebarLayout.vue';
+import Pagination from '@/components/Pagination.vue';
 
 const props = defineProps<{
     employees: any[];
@@ -13,6 +14,14 @@ const props = defineProps<{
 
 const search = ref(props.filters?.search || '');
 let searchTimeout: any = null;
+
+import { computed } from 'vue';
+const employeesList = computed(() => {
+    if (props.employees && (props.employees as any).data) {
+        return (props.employees as any).data;
+    }
+    return props.employees || [];
+});
 
 watch(search, (newSearch) => {
     clearTimeout(searchTimeout);
@@ -53,7 +62,7 @@ const deleteEmployee = (id: number) => {
                 </div>
             </div>
             
-            <div v-if="!employees || employees.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
+            <div v-if="employeesList.length === 0" class="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/50 dark:bg-zinc-950/20">
                 <div class="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center mb-4">
                     <UserCheck class="w-8 h-8" />
                 </div>
@@ -82,7 +91,7 @@ const deleteEmployee = (id: number) => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
-                            <tr v-for="employee in employees" :key="employee.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
+                            <tr v-for="employee in employeesList" :key="employee.id" class="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20 transition-colors">
                                 <td class="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100">
                                     {{ employee.name }}
                                 </td>
@@ -111,6 +120,9 @@ const deleteEmployee = (id: number) => {
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination -->
+                <Pagination v-if="employees && (employees as any).meta" :links="(employees as any).meta.links" :meta="(employees as any).meta" />
+                <Pagination v-else-if="employees && (employees as any).links" :links="(employees as any).links" :meta="(employees as any)" />
             </div>
         </div>
     </AdminSidebarLayout>

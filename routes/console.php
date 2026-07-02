@@ -9,3 +9,5 @@ Schedule::call(function () {
         ->where('expires_at', '<', now())
         ->delete();
 })->daily()->description('Delete expired team invitations');
+
+Schedule::command('app:send-daily-summary')->dailyAt('00:00');

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useForm, Head, Link } from '@inertiajs/vue3';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import PasswordInput from '@/components/PasswordInput.vue';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, AlertCircle } from '@lucide/vue';
+import PasswordInput from '@/components/PasswordInput.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const form = useForm({
     email: '',
@@ -17,6 +17,16 @@ const submit = () => {
     form.post('/admin/login', {
         onFinish: () => form.reset('password'),
     });
+};
+
+const autoFillSuperAdmin = () => {
+    form.email = 'superadmin@example.com';
+    form.password = 'superPassword';
+};
+
+const autoFillAdmin = () => {
+    form.email = 'admin@example.com';
+    form.password = 'adminPassword';
 };
 </script>
 
@@ -79,6 +89,26 @@ const submit = () => {
                                 class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus-visible:ring-indigo-500 focus-visible:border-indigo-500 transition-all h-11"
                                 placeholder="••••••••"
                             />
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mb-2">
+                            <Button 
+                                type="button" 
+                                variant="outline"
+                                @click="autoFillSuperAdmin" 
+                                class="w-full h-11 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            >
+                                Super Admin
+                            </Button>
+
+                            <Button 
+                                type="button" 
+                                variant="outline"
+                                @click="autoFillAdmin" 
+                                class="w-full h-11 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            >
+                                Admin
+                            </Button>
                         </div>
 
                         <Button 

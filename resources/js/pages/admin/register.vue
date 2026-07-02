@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useForm, Head, Link } from '@inertiajs/vue3';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import PasswordInput from '@/components/PasswordInput.vue';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, AlertCircle } from '@lucide/vue';
+import PasswordInput from '@/components/PasswordInput.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const form = useForm({
     name: '',
